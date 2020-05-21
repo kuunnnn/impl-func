@@ -1,0 +1,13 @@
+{
+  "name": "impl-func",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "fmt": "npx prettier --write '**/*.{ts,js,md}'",
+    "test:promise": "npx promises-aplus-tests promise-like.cjs"
+  },
+  "keywords": [],
+  "author": "Hu Kun",
+  "license": "MIT"
+}
