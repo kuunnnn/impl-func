@@ -1,28 +1,29 @@
-const PENDING = "PENDING";
-const FULFILLED = "FULFILLED";
-const REJECTED = "REJECTED";
+const PENDING = 'PENDING';
+const FULFILLED = 'FULFILLED';
+const REJECTED = 'REJECTED';
 
 // 浏览器中可以使用 asap.js 这个库
 // const nextTick = setTimeout;
-const nextTick = process.nextTick;
+// const nextTick = process.nextTick;
+const nextTick = setImmediate;
 
 function getDefaultFulfilledCallback(onFulfilled) {
-  return typeof onFulfilled === "function" ? onFulfilled : (value) => value;
+  return typeof onFulfilled === 'function' ? onFulfilled : value => value;
 }
 
 function getDefaultRejectedCallback(onRejected) {
-  return typeof onRejected === "function"
+  return typeof onRejected === 'function'
     ? onRejected
-    : (err) => {
+    : err => {
         throw err;
       };
 }
 function PromiseLike(exec) {
   if (!new.target) {
-    throw new TypeError("Promises must be constructed via new");
+    throw new TypeError('Promises must be constructed via new');
   }
-  if (typeof exec !== "function") {
-    throw TypeError("PromiseLike constructor argument is not a function");
+  if (typeof exec !== 'function') {
+    throw TypeError('PromiseLike constructor argument is not a function');
   }
   const self = this;
   // 下面属性不应该暴露在外面
@@ -36,14 +37,14 @@ function PromiseLike(exec) {
     if (self.status === PENDING) {
       self.status = FULFILLED;
       self.value = result;
-      self.onFulfilledCallback.forEach((e) => e());
+      self.onFulfilledCallback.forEach(e => e());
     }
   }
   function reject(reason) {
     if (self.status === PENDING) {
       self.status = REJECTED;
       self.reason = reason;
-      self.onRejectedCallback.forEach((e) => e());
+      self.onRejectedCallback.forEach(e => e());
     }
   }
   try {
@@ -67,18 +68,18 @@ function resolvePromiseLike(p1, x, resolve, reject) {
     //   }
     // );
     return reject(
-      new TypeError("Chaining cycle detected for promise #<Promise>")
+      new TypeError('Chaining cycle detected for promise #<Promise>')
     );
   }
   let called = false;
   // x instanceof PromiseLike
   // 如果返回的是 PromiseLike 的实例也是包含在下面判断中的
   // Promise A+ 2.3.2 如果x是一个承诺，则采用其状态[ 3.4 ]
-  if (x !== null && (typeof x === "object" || typeof x === "function")) {
+  if (x !== null && (typeof x === 'object' || typeof x === 'function')) {
     try {
       const then = x.then;
       // 这里不是我们的 promise 所有需要注意 then 方法的 onFulfilled, onRejected 参数不能被多次调用
-      if (typeof then === "function") {
+      if (typeof then === 'function') {
         // 如果 then 方法中的 resolve 或 reject 被反复执行,忽略掉后面的
         /*
         {
@@ -94,7 +95,7 @@ function resolvePromiseLike(p1, x, resolve, reject) {
         */
         then.call(
           x,
-          (y) => {
+          y => {
             if (called) return;
             called = true;
             /*
@@ -110,7 +111,7 @@ function resolvePromiseLike(p1, x, resolve, reject) {
             */
             resolvePromiseLike(p1, y, resolve, reject);
           },
-          (r) => {
+          r => {
             if (called) return;
             called = true;
             // Promise A+ 标准并没有说明这里的 r 也需要 resolve
@@ -152,7 +153,7 @@ PromiseLike.prototype.then = function then(onFulfilled, onRejected) {
             // 此处规范并没有要求 不过 node 14 会检测到错误 reject 时没有检查
             if (this === this.value) {
               return reject(
-                new TypeError("Chaining cycle detected for promise #<Promise>")
+                new TypeError('Chaining cycle detected for promise #<Promise>')
               );
             }
             resolvePromiseLike(promise2, x, resolve, reject);
@@ -209,7 +210,7 @@ PromiseLike.all = function (promiseArray) {
     let count = promiseArray.length;
     const result = [];
     promiseArray.forEach((e, i) => {
-      e.then((v) => {
+      e.then(v => {
         result[i] = v;
         if (--count === 0) {
           resolve(result);
@@ -220,7 +221,7 @@ PromiseLike.all = function (promiseArray) {
 };
 PromiseLike.race = function (promiseArray) {
   return new PromiseLike((resolve, reject) => {
-    promiseArray.forEach((e) => {
+    promiseArray.forEach(e => {
       e.then(resolve, reject);
     });
   });
